@@ -1,0 +1,272 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+.source-select, .target-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.source-select option, .target-select option {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+body { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+
+#map { z-index: 1; }
+.leaflet-container { background: #0a0a0a; }
+.leaflet-control-zoom a { background: rgba(0,0,0,0.8) !important; color: rgba(255,255,255,0.7) !important; border-color: rgba(255,255,255,0.1) !important; }
+.leaflet-control-zoom a:hover { color: #22d3ee !important; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+/* Hop entry accordion */
+.hop-entry {
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.hop-entry:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(34,211,238,0.2);
+}
+.hop-entry.expanded {
+  background: rgba(34,211,238,0.06);
+  border-color: rgba(34,211,238,0.3);
+}
+.hop-entry .hop-summary {
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.hop-entry .hop-summary .hop-label {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hop-entry .hop-summary .hop-rtt {
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.hop-entry .hop-detail {
+  display: none;
+  padding: 0 8px 6px 8px;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+.hop-entry.expanded .hop-detail {
+  display: block;
+}
+.hop-detail div {
+  margin-bottom: 2px;
+}
+.hop-detail .detail-key {
+  color: #64748b;
+}
+.hop-detail .detail-val {
+  color: #cbd5e1;
+}
+.hop-entry.source-entry { border-left: 2px solid #22d3ee; }
+.hop-entry.target-entry { border-left: 2px solid #ef4444; }
+.hop-entry.timeout-entry { border-left: 2px solid #f59e0b; }
+.hop-entry.timeout-entry .hop-summary { color: rgba(245, 158, 11, 0.7); }
+.hop-entry .hop-summary .hop-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.hop-entry.highlighted {
+  box-shadow: 0 0 12px rgba(34,211,238,0.4), inset 0 0 8px rgba(34,211,238,0.15);
+  border-color: rgba(34,211,238,0.6) !important;
+}
+
+/* Numbered badge markers — cyber glow */
+.hop-badge-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #020617;
+  font-weight: 900;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(245,158,11,0.6), inset 0 0 4px rgba(255,255,255,0.3);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  transition: transform 0.15s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.hop-badge-circle.src-badge {
+  box-shadow: 0 0 10px rgba(6,182,212,0.6), inset 0 0 4px rgba(255,255,255,0.3);
+}
+.hop-badge-circle.tgt-badge {
+  box-shadow: 0 0 10px rgba(239,68,68,0.6), inset 0 0 4px rgba(255,255,255,0.3);
+}
+.custom-hop-badge:hover .hop-badge-circle {
+  transform: scale(1.3);
+}
+/* Stacked marker ring for duplicate coordinates */
+.stacked-badge .hop-badge-circle {
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.35), 0 0 10px rgba(245,158,11,0.6), inset 0 0 4px rgba(255,255,255,0.3);
+}
+
+/* Flowing dash animation on polyline */
+.ixp-flow-line {
+  stroke-dasharray: 8 16;
+  animation: flowDash 2s linear infinite;
+}
+@keyframes flowDash {
+  to { stroke-dashoffset: -48; }
+}
+
+/* Marker ping ring on sidebar selection */
+.ping-ring {
+  animation: pingPulse 1.5s ease-out;
+}
+@keyframes pingPulse {
+  0%   { box-shadow: 0 0 10px rgba(245,158,11,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 0px currentColor; }
+  50%  { box-shadow: 0 0 10px rgba(245,158,11,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 8px rgba(34,211,238,0.4); }
+  100% { box-shadow: 0 0 10px rgba(245,158,11,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 16px rgba(34,211,238,0); }
+}
+
+/* Reverse ping for source badge */
+.hop-badge-circle.src-badge.ping-ring {
+  animation-name: pingPulseSrc;
+}
+@keyframes pingPulseSrc {
+  0%   { box-shadow: 0 0 10px rgba(6,182,212,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 0px currentColor; }
+  50%  { box-shadow: 0 0 10px rgba(6,182,212,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 8px rgba(6,182,212,0.4); }
+  100% { box-shadow: 0 0 10px rgba(6,182,212,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 16px rgba(6,182,212,0); }
+}
+.hop-badge-circle.tgt-badge.ping-ring {
+  animation-name: pingPulseTgt;
+}
+@keyframes pingPulseTgt {
+  0%   { box-shadow: 0 0 10px rgba(239,68,68,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 0px currentColor; }
+  50%  { box-shadow: 0 0 10px rgba(239,68,68,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 8px rgba(239,68,68,0.4); }
+  100% { box-shadow: 0 0 10px rgba(239,68,68,0.6), inset 0 0 4px rgba(255,255,255,0.3), 0 0 0 16px rgba(239,68,68,0); }
+}
+
+/* ── Enrichment tech-spec micro-badges ── */
+.enrich-section {
+  margin-bottom: 3px;
+  font-size: 9px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.enrich-section code {
+  background: rgba(255,255,255,0.06);
+  padding: 0px 4px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-family: inherit;
+  color: #cbd5e1;
+}
+.badge {
+  display: inline-block;
+  font-size: 7px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-family: inherit;
+}
+.badge-isp  { background: rgba(59,130,246,0.2); color: #60a5fa; }
+.badge-net  { background: rgba(16,185,129,0.18); color: #34d399; }
+.badge-ixp  { background: rgba(168,85,247,0.2); color: #a78bfa; }
+.badge-pni  { background: rgba(245,158,11,0.18); color: #fbbf24; }
+.badge-sub  { background: rgba(6,182,212,0.18); color: #22d3ee; }
+.badge-iface{ background: rgba(148,163,184,0.15); color: #94a3b8; }
+.badge-100g { background: rgba(239,68,68,0.2); color: #f87171; }
+.badge-10g  { background: rgba(250,204,21,0.2); color: #facc15; }
+.badge-lag  { background: rgba(168,85,247,0.2); color: #a78bfa; }
+.badge-core { background: rgba(239,68,68,0.15); color: #f87171; }
+.badge-edge { background: rgba(34,211,238,0.15); color: #22d3ee; }
+.badge-iata { background: rgba(16,185,129,0.15); color: #34d399; }
+.badge-rdap { background: rgba(100,116,139,0.2); color: #94a3b8; }
+.badge-mpls { background: rgba(34,211,238,0.15); color: #22d3ee; }
+
+.host-badge {
+  font-size: 7px;
+  background: rgba(148,163,184,0.15);
+  color: #64748b;
+  padding: 0px 3px;
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.host-badge:hover { background: rgba(148,163,184,0.3); color: #cbd5e1; }
+
+/* ── Oceanic leap styling ── */
+.ixp-ocean-line {
+  animation: oceanPulse 3s ease-in-out infinite;
+}
+@keyframes oceanPulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; stroke-dashoffset: -25; }
+}
+
+.ocean-badge-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(2,132,199,0.25);
+  border: 2px solid #0284c7;
+  color: #38bdf8;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(2,132,199,0.5);
+  animation: oceanPing 2s ease-in-out infinite;
+}
+@keyframes oceanPing {
+  0%, 100% { box-shadow: 0 0 10px rgba(2,132,199,0.5); }
+  50% { box-shadow: 0 0 20px rgba(2,132,199,0.8), 0 0 40px rgba(2,132,199,0.3); }
+}
+
+.oceanic-explainer {
+  background: rgba(2,132,199,0.08);
+  border-radius: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(2,132,199,0.2);
+}
+
+/* Reset zoom button */
+.reset-zoom-btn {
+  width: 30px;
+  height: 30px;
+  background: rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  margin-top: 4px;
+}
+.reset-zoom-btn:hover { color: #22d3ee; background: rgba(0,0,0,0.9); }

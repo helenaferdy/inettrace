@@ -1,0 +1,15 @@
+[Unit]
+Description=Network Traceroute Visualizer
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/ixp
+ExecStart=/opt/ixp/venv/bin/python main.py
+Restart=on-failure
+RestartSec=5
+EnvironmentFile=/opt/ixp/.env
+
+[Install]
+WantedBy=multi-user.target

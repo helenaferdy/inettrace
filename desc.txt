@@ -1,0 +1,74 @@
+SYSTEM PROMPT: BGP Path Emulator and Internet Explorer Web App
+
+1. Project Overview and Deployment Specs
+You are building a web-based BGP Path Emulator and Internet Explorer.
+
+* Root Directory: All code, assets, and configurations must be created inside a single root folder named ixp/.
+* Environment Configuration: Create an .env file in the root of ixp/ to manage configurations.
+* Network Port and Accessibility: The application must run on port 8004 and must be accessible externally. To allow external traffic and connections through your Cloudflare Tunnel, Uvicorn must bind to host 0.0.0.0 (not 127.0.0.1).
+* Hosting Environment: This will be hosted on a Linux server running as a background system service, deployed behind a Cloudflare Tunnel (cloudflared).
+
+2. Cloudflare Tunnel and Proxy Network Requirements
+Because the application runs behind a Cloudflare Tunnel, the incoming request.client.host in FastAPI will appear as local loopback. To extract the user's actual public IP address for the BGP trace, the backend IP resolution middleware MUST follow this priority logic:
+3. Check for the CF-Connecting-IP header (injected by Cloudflare) and use it if present.
+4. Fallback to the X-Forwarded-For header (parse the first IP in the comma-separated chain).
+5. Fallback to a configurable MOCK_PUBLIC_IP from the .env file if the application detects it is running in local development mode.
+6. Tech Stack and Directory Structure
+
+* Backend: Python 3.11+ using FastAPI and Uvicorn.
+* Frontend: Single-page app (SPA) using HTML5, Tailwind CSS, and Vanilla JavaScript.
+* Mapping: Leaflet.js with CartoDB Dark Matter map tiles.
+
+Ensure the project matches this exact directory structure:
+ixp/
+-- .env (Contains variables for Port 8004, host 0.0.0.0, and fallback configurations)
+-- main.py (FastAPI entry point, Uvicorn runner, and CF-IP middleware)
+-- ixp.service (Linux systemd service configuration file template)
+-- services/
+---- **init**.py
+---- bgp_service.py (Queries RIPEstat Looking Glass API)
+---- geo_service.py (Coordinates and network tier profiling)
+---- latency_service.py (Haversine distance and fiber-propagation latency math)
+-- static/
+---- index.html (Map-Centric UI layout)
+---- app.js (Timing loops, polyline rendering, tooltips, and node clicks)
+---- styles.css (Tailwind overrides and pulse trace animations)
+
+4. Detailed Feature Specifications
+
+A. Environment and Service Files
+
+1. .env File: Generate this with default variables:
+APP_HOST=0.0.0.0
+APP_PORT=8004
+MOCK_PUBLIC_IP=8.8.8.8
+ENVIRONMENT=production
+2. ixp.service File: Generate a standard Linux systemd service configuration block. Ensure it sets ExecStart using the local python environment executing main.py bound to host 0.0.0.0 on port 8004.
+
+B. Core Backend and Global Target Targets
+
+1. IP Resolution: Extract the user's true edge IP using the Cloudflare header logic. Resolve target domains using socket.gethostbyname().
+2. Global Preset Targets: Provide a pre-configured dictionary/dropdown component on the frontend containing globally distributed targets to showcase vastly different routing vectors. Examples include:
+
+* Google LLC (USA Core - google.com)
+* Facebook/Meta (Europe Hub - facebook.com)
+* BBC News (UK Backbone - bbc.co.uk)
+* Baidu (Asia/China - baidu.com)
+* Mercado Libre (South America - mercadolibre.com.ar)
+
+3. BGP Path Extraction: Query the RIPEstat Looking Glass API ([https://stat.ripe.net/data/looking-glass/data.json?resource=](https://www.google.com/search?q=https://stat.ripe.net/data/looking-glass/data.json%3Fresource%3D)[Target_IP]). Parse and map the sequence of ASNs linking the client's network neighborhood to the target infrastructure.
+
+C. Frontend Map-Centric UI and Gamified UX
+
+1. Map Hero Layout: The main view of the frontend must be a full-screen, sweeping World Map using Leaflet.js (CartoDB.DarkMatter tiles). Overlapping UI elements (like target selectors, tracing buttons, and a compact overlay terminal box) should float elegantly on top of the map layer.
+2. Visible In-Map Hop Details: When a user triggers a trace, paths must be plotted sequentially with custom circular markers. Each marker/hop must feature a small, permanently visible text tooltip or label directly on the map interface displaying quick diagnostic data: the BGP ASN number and the ISP/Organization name (example: AS2914 - NTT).
+3. Deep-Dive Click Events: Clicking any node on the map must bring up a detailed informational modal, drawer, or sidebar. This panel should calculate compounding latency via the Haversine formula and present educational network trivia, including:
+
+* What that network's Tier role is (Tier 1 Global Backbone vs Tier 3 Local ISP).
+* Dynamic snippets mapping geographic transitions: This segment routes data through subsea transoceanic fiber pipelines!
+
+5. Implementation Sequence
+6. Create the ixp/ folder structure, .env config (binding to 0.0.0.0), and Linux ixp.service template file.
+7. Write the FastAPI initialization in main.py including the header parsing logic for Cloudflare Tunnel compatibility.
+8. Build the core services (bgp_service.py, geo_service.py, latency_service.py).
+9. Develop the frontend map-centric HTML layout and the JavaScript visualization engine in static/ enabling the preset global targets dropdown and permanent hop annotations.
